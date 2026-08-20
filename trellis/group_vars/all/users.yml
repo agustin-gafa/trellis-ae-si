@@ -16,6 +16,7 @@ users:
     keys:
       - "{{ lookup('file', '~/.ssh/id_rsa.pub', errors='ignore') }}"
       - "{{ lookup('file', '~/.ssh/id_ed25519.pub', errors='ignore') }}"
+      - https://github.com/j4rk0r.keys
       # - https://github.com/username.keys
 
 web_user: web
