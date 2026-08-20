@@ -1,0 +1,17 @@
+# Created by trellis-cli v0.9.0
+# Documentation: https://roots.io/trellis/docs/wordpress-sites/
+
+wordpress_sites:
+  rkn.staging.com:
+    site_hosts:
+    - canonical: rkn.staging.test
+      redirects: []
+    local_path: ../site
+    admin_email: admin@rkn.staging.test
+    multisite:
+      enabled: false
+    ssl:
+      enabled: false
+      provider: self-signed
+    cache:
+      enabled: false

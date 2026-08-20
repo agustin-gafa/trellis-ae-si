@@ -1,0 +1,19 @@
+# Created by trellis-cli v0.9.0
+# Documentation: https://roots.io/trellis/docs/wordpress-sites/
+
+wordpress_sites:
+  rkn.staging.com:
+    site_hosts:
+    - canonical: rkn.staging.com
+      redirects: []
+    local_path: ../site
+    branch: main
+    repo: git@github.com:example/example.com.git
+    repo_subtree_path: site
+    multisite:
+      enabled: false
+    ssl:
+      enabled: false
+      provider: letsencrypt
+    cache:
+      enabled: false
