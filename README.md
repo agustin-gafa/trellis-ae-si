@@ -10,11 +10,15 @@ Ver [`CLAUDE.md`](./CLAUDE.md) para el detalle de arquitectura pensado para trab
 
 ## 1. Cómo está organizado
 
-| Repositorio | Qué contiene | Remote |
-|---|---|---|
-| `trellis/` (este repo, `trellis-ae-si`) | Infraestructura: servidor, nginx, PHP, MySQL, credenciales de cada sitio | `git@github.com:agustin-gafa/trellis-ae-si.git` |
-| `site-swedishinstitute/` | Código de `swedishinstitute.edu` (tema, plugins, config de Bedrock) | `git@github.com-si:agustin-gafa/swedishinstitute.git` |
-| `site-aeinstitute/` | Código de `aeinstitute.net` | `git@github.com-ae:agustin-gafa/aeinstitute.git` |
+| Repositorio | Qué contiene | Remote (deploy key alias) | Docs propias |
+|---|---|---|---|
+| `trellis/` (este repo, `trellis-ae-si`) | Infraestructura: servidor, nginx, PHP, MySQL, credenciales de cada sitio | `git@github.com:agustin-gafa/trellis-ae-si.git` | este README + CLAUDE.md |
+| `site-swedishinstitute/` | Código de `swedishinstitute.edu` (tema, plugins, config de Bedrock) | `git@github.com-si:agustin-gafa/swedishinstitute.git` | ese repo tiene su propio `README.md`/`DEPLOYMENT.md`/`CLAUDE.md` — consultalos para detalle específico de ese sitio |
+| `site-aeinstitute/` | Código de `aeinstitute.net` | `git@github.com-ae:agustin-gafa/aeinstitute.git` | ese repo tiene su propio `README.md`/`DEPLOYMENT.md`/`CLAUDE.md` — consultalos para detalle específico de ese sitio |
+
+(El alias SSH de la columna "Remote" es el que usa `trellis/group_vars/staging/wordpress_sites.yml` para
+las deploy keys del servidor. El `origin` de cada repo clonado localmente es
+`git@github.com:agustin-gafa/<repo>.git`, sin alias.)
 
 Los dos sitios comparten el mismo servidor de staging (`178.156.244.142`), pero cada uno tiene su propio
 código en su propio repo. Trellis es el que conecta ambos: en
@@ -171,3 +175,10 @@ nombres de carpeta.
   desde el admin de WordPress.
 - Los hooks de build de assets (`trellis/deploy-hooks/build-*.yml`) están comentados (boilerplate de
   ejemplo para un theme Sage): los deploys actuales no corren ningún paso de build de frontend.
+- **`site-aeinstitute/` y `site-swedishinstitute/` están desactualizados** (scaffold vacío de Bedrock, sin
+  tema real ni `.git` propio) — no los uses como referencia del código de esos sitios. El código real vive
+  en los repos propios `aeinstitute` (`git@github.com:agustin-gafa/aeinstitute.git`) y `swedishinstitute`
+  (`git@github.com:agustin-gafa/swedishinstitute.git`), cada uno con su propio `README.md`/`DEPLOYMENT.md`.
+  En esta máquina esos checkouts reales viven bajo Devilbox
+  (`/srv/http/devilbox/data/www/aeinstitute` y `/srv/http/devilbox/data/www/swedishinstitute`), no como
+  hermanos de `trellis/`.

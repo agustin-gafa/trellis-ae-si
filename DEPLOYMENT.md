@@ -2,6 +2,11 @@
 
 Para el equipo — cómo desplegar cambios y entrar al servidor.
 
+> Si trabajás en un solo sitio, tanto `aeinstitute` como `swedishinstitute` tienen su propio
+> `DEPLOYMENT.md` con esta misma guía recortada a ese sitio. Esta guía sigue siendo la
+> referencia cuando el cambio toca infraestructura compartida (provision, vault, SSH) entre
+> ambos.
+
 ## 1. Cómo está organizado
 
 Hay **tres repositorios separados** involucrados, no uno solo:

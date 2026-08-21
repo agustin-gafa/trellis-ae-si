@@ -26,7 +26,20 @@ there). There is no `production` inventory populated yet, and no local `site/` c
 
 Site repos are deployed from their own GitHub repos (`git@github.com-si:...`, `git@github.com-ae:...` — note
 the custom SSH host aliases per site), not pushed from this monorepo; `site-swedishinstitute/` and
-`site-aeinstitute/` here are local Bedrock checkouts used for editing before pushing to those repos.
+`site-aeinstitute/` here are meant to be local Bedrock checkouts used for editing before pushing to those
+repos.
+
+**Known gotcha:** as of 2026-08-21, both `site-aeinstitute/` and `site-swedishinstitute/` here are stale —
+each is committed as a plain directory inside this monorepo's own `.git` (no `.git` of its own, not a
+submodule) and only holds Bedrock scaffolding (`.gitkeep` placeholders, no theme code). The real code
+lives only in the actual per-site repos — `aeinstitute` (`git@github.com:agustin-gafa/aeinstitute.git`)
+and `swedishinstitute` (`git@github.com:agustin-gafa/swedishinstitute.git`) — each of which has its own
+`CLAUDE.md`, `README.md`, and `DEPLOYMENT.md`; read those directly for that site's architecture and deploy
+runbook instead of relying on these folders. On this machine, the real checkouts live under Devilbox at
+`/srv/http/devilbox/data/www/aeinstitute` and `/srv/http/devilbox/data/www/swedishinstitute` — not as
+siblings of `trellis/`. This is harmless for staging deploys (`trellis deploy` pulls from `repo:` on the
+server, not from `local_path`); these folders only matter if you actually want a self-contained sibling
+tree for `trellis-cli`, and would need the real repos cloned into them first.
 
 Each site's `web/app/plugins/*`, `web/app/themes/twentytwentyfive/`, and `web/wp` are gitignored — they're
 installed via Composer (`wp-theme/twentytwentyfive` is pulled as a Composer package), not committed.
