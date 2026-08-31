@@ -1,19 +1,46 @@
-# Created by trellis-cli v0.9.0
-# Documentation: https://roots.io/trellis/docs/wordpress-sites/
-
 wordpress_sites:
-  rkn.staging.com:
+  swedishinstitute.edu:
     site_hosts:
-    - canonical: rkn.staging.com
-      redirects: []
-    local_path: ../site
+      - canonical: staging-si.rockinmedia.space
+      - canonical: info.staging-si.rockinmedia.space
+    local_path: ../site-swedishinstitute
     branch: main
-    repo: git@github.com:example/example.com.git
-    repo_subtree_path: site
+    repo: git@github.com-si:agustin-gafa/swedishinstitute.git
     multisite:
-      enabled: false
+      enabled: true
+      subdomains: true
+    env:
+      multisite: true
+      wp_allow_multisite: true
+      subdomain_install: true
+      path_current_site: /
+      site_id_current_site: 1
+      blog_id_current_site: 1
     ssl:
+      enabled: true
+      provider: letsencrypt
+    cache:
       enabled: false
+
+  aeinstitute.net:
+    site_hosts:
+      - canonical: staging-ae.rockinmedia.space
+      - canonical: info.staging-ae.rockinmedia.space
+    local_path: ../site-aeinstitute
+    branch: main
+    repo: git@github.com-ae:agustin-gafa/aeinstitute.git
+    multisite:
+      enabled: true
+      subdomains: true
+    env:
+      multisite: true
+      wp_allow_multisite: true
+      subdomain_install: true
+      path_current_site: /
+      site_id_current_site: 1
+      blog_id_current_site: 1
+    ssl:
+      enabled: true
       provider: letsencrypt
     cache:
       enabled: false
