@@ -16,6 +16,9 @@ wordpress_sites:
       path_current_site: /
       site_id_current_site: 1
       blog_id_current_site: 1
+      # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
+      # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
+      mailgun_domain: send.swedishinstitute.edu
     ssl:
       enabled: true
       provider: letsencrypt
@@ -39,6 +42,9 @@ wordpress_sites:
       path_current_site: /
       site_id_current_site: 1
       blog_id_current_site: 1
+      # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
+      # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
+      mailgun_domain: mg.aeinstitute.net
     ssl:
       enabled: true
       provider: letsencrypt
