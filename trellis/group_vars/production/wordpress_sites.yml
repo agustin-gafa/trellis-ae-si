@@ -3,6 +3,10 @@ wordpress_sites:
     site_hosts:
       - canonical: staging-si.rockinmedia.space
       - canonical: info.staging-si.rockinmedia.space
+      # Un host solo entra aqui cuando su DNS ya apunta a este servidor: Let's
+      # Encrypt valida por HTTP y, si el dominio resuelve a otro sitio, la
+      # emision falla y aborta el aprovisionamiento entero.
+      - canonical: info.swedishinstitute.edu
     local_path: ../site-swedishinstitute
     branch: main
     repo: git@github.com-si:agustin-gafa/swedishinstitute.git
