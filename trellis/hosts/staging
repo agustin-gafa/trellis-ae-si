@@ -1,8 +1,9 @@
 # Staging fue dado de baja — el servidor ahora es production.
 # Ver hosts/production.
 
-[web]
-2.29.4.203
+# hosts/staging
+[staging]
+178.156.218.135
 
-[staging:children]
-web
+[web]
+178.156.218.135
