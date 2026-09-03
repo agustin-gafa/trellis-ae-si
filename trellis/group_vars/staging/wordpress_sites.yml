@@ -1,1 +1,48 @@
-wordpress_sites: {}
+wordpress_sites:
+  swedishinstitute.edu:
+    site_hosts:
+      - canonical: staging-si.rockinmedia.space
+      - canonical: info.staging-si.rockinmedia.space
+    local_path: ../site-swedishinstitute
+    branch: develop
+    repo: git@github.com-si:agustin-gafa/swedishinstitute.git
+    multisite:
+      enabled: true
+      subdomains: true
+    env:
+      multisite: true
+      wp_allow_multisite: true
+      subdomain_install: true
+      path_current_site: /
+      site_id_current_site: 1
+      blog_id_current_site: 1
+      mailgun_domain: send.swedishinstitute.edu
+    ssl:
+      enabled: true
+      provider: letsencrypt
+    cache:
+      enabled: false
+
+  aeinstitute.net:
+    site_hosts:
+      - canonical: staging-ae.rockinmedia.space
+      - canonical: info.staging-ae.rockinmedia.space
+    local_path: ../site-aeinstitute
+    branch: develop
+    repo: git@github.com-ae:agustin-gafa/aeinstitute.git
+    multisite:
+      enabled: true
+      subdomains: true
+    env:
+      multisite: truedevelop
+      wp_allow_multisite: true
+      subdomain_install: true
+      path_current_site: /
+      site_id_current_site: 1
+      blog_id_current_site: 1
+      mailgun_domain: mg.aeinstitute.net
+    ssl:
+      enabled: true
+      provider: letsencrypt
+    cache:
+      enabled: false

@@ -4,7 +4,7 @@ wordpress_sites:
     # Lo ajusto para que quede como prioridad al crear el .env al desplegar,
     # cuando hay mas host no va bien
       - canonical: info.swedishinstitute.edu
-      - canonical: staging-si.rockinmedia.space
+      # - canonical: staging-si.rockinmedia.space
       # - canonical: info.staging-si.rockinmedia.space
       # Un host solo entra aqui cuando su DNS ya apunta a este servidor: Let's
       # Encrypt valida por HTTP y, si el dominio resuelve a otro sitio, la
@@ -31,28 +31,28 @@ wordpress_sites:
     cache:
       enabled: false
 
-  aeinstitute.net:
-    site_hosts:
-      - canonical: staging-ae.rockinmedia.space
-      - canonical: info.staging-ae.rockinmedia.space
-    local_path: ../site-aeinstitute
-    branch: main
-    repo: git@github.com-ae:agustin-gafa/aeinstitute.git
-    multisite:
-      enabled: true
-      subdomains: true
-    env:
-      multisite: true
-      wp_allow_multisite: true
-      subdomain_install: true
-      path_current_site: /
-      site_id_current_site: 1
-      blog_id_current_site: 1
-      # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
-      # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
-      mailgun_domain: mg.aeinstitute.net
-    ssl:
-      enabled: true
-      provider: letsencrypt
-    cache:
-      enabled: false
+  # aeinstitute.net:
+  #   site_hosts:
+  #     - canonical: staging-ae.rockinmedia.space
+  #     - canonical: info.staging-ae.rockinmedia.space
+  #   local_path: ../site-aeinstitute
+  #   branch: main
+  #   repo: git@github.com-ae:agustin-gafa/aeinstitute.git
+  #   multisite:
+  #     enabled: true
+  #     subdomains: true
+  #   env:
+  #     multisite: true
+  #     wp_allow_multisite: true
+  #     subdomain_install: true
+  #     path_current_site: /
+  #     site_id_current_site: 1
+  #     blog_id_current_site: 1
+  #     # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
+  #     # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
+  #     mailgun_domain: mg.aeinstitute.net
+  #   ssl:
+  #     enabled: true
+  #     provider: letsencrypt
+  #   cache:
+  #     enabled: false
