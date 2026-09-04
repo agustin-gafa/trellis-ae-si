@@ -31,28 +31,33 @@ wordpress_sites:
     cache:
       enabled: false
 
-  # aeinstitute.net:
-  #   site_hosts:
-  #     - canonical: staging-ae.rockinmedia.space
-  #     - canonical: info.staging-ae.rockinmedia.space
-  #   local_path: ../site-aeinstitute
-  #   branch: main
-  #   repo: git@github.com-ae:agustin-gafa/aeinstitute.git
-  #   multisite:
-  #     enabled: true
-  #     subdomains: true
-  #   env:
-  #     multisite: true
-  #     wp_allow_multisite: true
-  #     subdomain_install: true
-  #     path_current_site: /
-  #     site_id_current_site: 1
-  #     blog_id_current_site: 1
-  #     # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
-  #     # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
-  #     mailgun_domain: mg.aeinstitute.net
-  #   ssl:
-  #     enabled: true
-  #     provider: letsencrypt
-  #   cache:
-  #     enabled: false
+  aeinstitute.net:
+    # El primer canonical es el que Trellis escribe en WP_HOME y WP_SITEURL del
+    # .env, y de ahi salen plugins_url(), content_url() y el URI del tema: es
+    # decir, todo el CSS, el JS y las fuentes. Por eso va el dominio real y no
+    # el host de trabajo, y por eso el orden no es cosmetico.
+    site_hosts:
+      - canonical: info.aeinstitute.net
+    # - canonical: staging-ae.rockinmedia.space
+    # - canonical: info.staging-ae.rockinmedia.space
+    local_path: ../site-aeinstitute
+    branch: main
+    repo: git@github.com-ae:agustin-gafa/aeinstitute.git
+    multisite:
+      enabled: true
+      subdomains: true
+    env:
+      multisite: true
+      wp_allow_multisite: true
+      subdomain_install: true
+      path_current_site: /
+      site_id_current_site: 1
+      blog_id_current_site: 1
+      # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
+      # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
+      mailgun_domain: mg.aeinstitute.net
+    ssl:
+      enabled: true
+      provider: letsencrypt
+    cache:
+      enabled: false
