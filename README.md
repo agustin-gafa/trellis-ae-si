@@ -13,25 +13,30 @@ Ver [`CLAUDE.md`](./CLAUDE.md) para el detalle de arquitectura pensado para trab
 | Repositorio | Qué contiene | Remote (deploy key alias) | Docs propias |
 |---|---|---|---|
 | `trellis/` (este repo, `trellis-ae-si`) | Infraestructura: servidor, nginx, PHP, MySQL, credenciales de cada sitio | `git@github.com:agustin-gafa/trellis-ae-si.git` | este README + CLAUDE.md |
-| `site-swedishinstitute/` | Código de `swedishinstitute.edu` (tema, plugins, config de Bedrock) | `git@github.com-si:agustin-gafa/swedishinstitute.git` | ese repo tiene su propio `README.md`/`DEPLOYMENT.md`/`CLAUDE.md` — consultalos para detalle específico de ese sitio |
-| `site-aeinstitute/` | Código de `aeinstitute.net` | `git@github.com-ae:agustin-gafa/aeinstitute.git` | ese repo tiene su propio `README.md`/`DEPLOYMENT.md`/`CLAUDE.md` — consultalos para detalle específico de ese sitio |
+| `swedishinstitute` (repo aparte) | Código de `swedishinstitute.edu` (tema, plugins, config de Bedrock) | `git@github.com-si:agustin-gafa/swedishinstitute.git` | ese repo tiene su propio `README.md`/`DEPLOYMENT.md`/`CLAUDE.md` — consultalos para detalle específico de ese sitio |
+| `aeinstitute` (repo aparte) | Código de `aeinstitute.net` | `git@github.com-ae:agustin-gafa/aeinstitute.git` | ese repo tiene su propio `README.md`/`DEPLOYMENT.md`/`CLAUDE.md` — consultalos para detalle específico de ese sitio |
+
+🔴 **El código de los sitios NO vive en este repositorio.** Cada uno se clona por su cuenta, donde
+quieras. Y el despliegue no lo lee de tu máquina: hace `git pull` **en el servidor**, así que lo que no
+esté empujado no llega.
 
 (El alias SSH de la columna "Remote" es el que usa `trellis/group_vars/staging/wordpress_sites.yml` para
 las deploy keys del servidor. El `origin` de cada repo clonado localmente es
 `git@github.com:agustin-gafa/<repo>.git`, sin alias.)
 
-Los dos sitios comparten el mismo servidor de staging (`178.156.244.142`), pero cada uno tiene su propio
-código en su propio repo. Trellis es el que conecta ambos: en
-`trellis/group_vars/staging/wordpress_sites.yml` cada sitio define su `repo:` y su `local_path:` (una
-carpeta hermana al repo de Trellis).
+Los dos sitios comparten servidor, pero cada uno tiene su propio código en su propio repo. Trellis es el
+que conecta ambos: en `trellis/group_vars/<entorno>/wordpress_sites.yml` cada sitio define su `repo:`,
+que es de donde el **servidor** clona.
 
-Estructura local esperada:
+`local_path:` sigue declarado ahí porque Trellis lo espera, pero **no lo usa ningún playbook**: solo
+aparece en los ejemplos comentados de `trellis/deploy-hooks/build-before.yml`, para quien quiera compilar
+assets en local antes de subir. No hace falta que exista esa carpeta.
+
+Estructura de este repositorio:
 
 ```
 trellis-ae-si/
-├── trellis/                  ← config de infraestructura (este repo)
-├── site-swedishinstitute/    ← repo propio
-└── site-aeinstitute/         ← repo propio
+└── trellis/                  ← config de infraestructura: es todo lo que hay aquí
 ```
 
 ## 2. Requisitos
@@ -44,11 +49,8 @@ trellis-ae-si/
 - La contraseña del Ansible Vault (pedirla a Agustín por un gestor de contraseñas del equipo — **nunca**
   por Slack ni email)
 
-```bash
-# Dependencias de cada sitio
-cd site-swedishinstitute && composer install && cd ..
-cd site-aeinstitute && composer install && cd ..
-```
+Para desplegar no hace falta instalar las dependencias de ningún sitio: el `composer install` lo ejecuta
+el propio despliegue **en el servidor**, con el `composer.lock` que venga en el repo del sitio.
 
 ## 3. Cómo desplegar un cambio
 
@@ -131,7 +133,7 @@ wp <comando> --allow-root
 
 ## 6. Comandos habituales
 
-### Sitios (Bedrock) — dentro de `site-swedishinstitute/` o `site-aeinstitute/`
+### Sitios (Bedrock) — dentro de tu clon de `swedishinstitute` o `aeinstitute`
 
 ```bash
 composer install       # instalar dependencias PHP
@@ -175,10 +177,7 @@ nombres de carpeta.
   desde el admin de WordPress.
 - Los hooks de build de assets (`trellis/deploy-hooks/build-*.yml`) están comentados (boilerplate de
   ejemplo para un theme Sage): los deploys actuales no corren ningún paso de build de frontend.
-- **`site-aeinstitute/` y `site-swedishinstitute/` están desactualizados** (scaffold vacío de Bedrock, sin
-  tema real ni `.git` propio) — no los uses como referencia del código de esos sitios. El código real vive
-  en los repos propios `aeinstitute` (`git@github.com:agustin-gafa/aeinstitute.git`) y `swedishinstitute`
-  (`git@github.com:agustin-gafa/swedishinstitute.git`), cada uno con su propio `README.md`/`DEPLOYMENT.md`.
-  En esta máquina esos checkouts reales viven bajo Devilbox
-  (`/srv/http/devilbox/data/www/aeinstitute` y `/srv/http/devilbox/data/www/swedishinstitute`), no como
-  hermanos de `trellis/`.
+- **El código de los sitios no está en este repositorio.** Vive en sus repos propios, `aeinstitute`
+  (`git@github.com:agustin-gafa/aeinstitute.git`) y `swedishinstitute`
+  (`git@github.com:agustin-gafa/swedishinstitute.git`), cada uno con su `README.md`/`DEPLOYMENT.md`.
+  Clónalos donde quieras: el despliegue tira de `repo:` **en el servidor**, no de tu disco.

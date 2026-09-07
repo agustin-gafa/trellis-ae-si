@@ -3,6 +3,9 @@ wordpress_sites:
     site_hosts:
       - canonical: staging-si.rockinmedia.space
       - canonical: info.staging-si.rockinmedia.space
+    # local_path lo espera Trellis, pero no lo lee ningun playbook: solo sale en
+    # los ejemplos comentados de deploy-hooks/build-before.yml. El codigo del
+    # sitio se clona aparte y el despliegue lo trae con git pull EN EL SERVIDOR.
     local_path: ../site-swedishinstitute
     branch: develop
     repo: git@github.com-si:agustin-gafa/swedishinstitute.git
@@ -27,6 +30,7 @@ wordpress_sites:
     site_hosts:
       - canonical: staging-ae.rockinmedia.space
       - canonical: info.staging-ae.rockinmedia.space
+    # Ver la nota de local_path de arriba.
     local_path: ../site-aeinstitute
     branch: develop
     repo: git@github.com-ae:agustin-gafa/aeinstitute.git
