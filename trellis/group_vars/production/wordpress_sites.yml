@@ -9,6 +9,9 @@ wordpress_sites:
       # Un host solo entra aqui cuando su DNS ya apunta a este servidor: Let's
       # Encrypt valida por HTTP y, si el dominio resuelve a otro sitio, la
       # emision falla y aborta el aprovisionamiento entero.
+    # local_path lo espera Trellis, pero no lo lee ningun playbook: solo sale en
+    # los ejemplos comentados de deploy-hooks/build-before.yml. El codigo del
+    # sitio se clona aparte y el despliegue lo trae con git pull EN EL SERVIDOR.
     local_path: ../site-swedishinstitute
     branch: main
     repo: git@github.com-si:agustin-gafa/swedishinstitute.git
@@ -40,6 +43,7 @@ wordpress_sites:
       - canonical: info.aeinstitute.net
     # - canonical: staging-ae.rockinmedia.space
     # - canonical: info.staging-ae.rockinmedia.space
+    # Ver la nota de local_path de arriba.
     local_path: ../site-aeinstitute
     branch: main
     repo: git@github.com-ae:agustin-gafa/aeinstitute.git

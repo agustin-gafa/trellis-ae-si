@@ -10,36 +10,30 @@ This is a **Trellis** (Ansible-powered LEMP provisioning/deploy stack) monorepo 
 - `trellis/` — Ansible playbooks, roles, and inventory that provision servers and deploy the sites. This
   directory's own repo is `trellis-ae-si` (`git@github.com:agustin-gafa/trellis-ae-si.git` — the local
   checkout folder name may differ, e.g. `rkn.staging.com`).
-- `site-swedishinstitute/` — Bedrock site for `swedishinstitute.edu`, own repo
-  (`git@github.com-si:agustin-gafa/swedishinstitute.git`).
-- `site-aeinstitute/` — Bedrock site for `aeinstitute.net`, own repo
-  (`git@github.com-ae:agustin-gafa/aeinstitute.git`).
+**The site code is NOT in this repository.** Each site is its own repo, cloned wherever you like:
+`git@github.com-si:agustin-gafa/swedishinstitute.git` and
+`git@github.com-ae:agustin-gafa/aeinstitute.git`.
 
-These are three separate git repositories that must live as sibling directories on disk (as they do here)
-for Trellis's relative `local_path` references to work. See `README.md` for the full deploy/SSH runbook.
+`local_path` in `wordpress_sites.yml` is still declared because Trellis expects the key, but **no playbook
+reads it**: it appears only in the commented-out examples of `trellis/deploy-hooks/build-before.yml`, for
+anyone who wants to build assets locally before pushing. The folder it names does not need to exist.
 
-Both sites are configured as **WordPress multisite (subdomain)** installs and only exist as a `staging`
-environment currently (see `trellis/hosts/staging` — single droplet `178.156.244.142`, both sites deployed
-there). There is no `production` inventory populated yet, and no local `site/` checkout — the
-`trellis/group_vars/development/wordpress_sites.yml` entry (`rkn.staging.com`) is unused scaffolding from
-`trellis-cli new`, not an active site.
+The deploy `git pull`s the site repo **on the server**, so nothing unpushed ever ships. See `README.md`
+for the full deploy/SSH runbook.
+
+Both sites are configured as **WordPress multisite (subdomain)** installs. **`production` is the live
+environment** — `trellis/hosts/production`, single host `178.156.244.142`, both sites deployed there and
+serving real traffic. The `trellis/group_vars/development/wordpress_sites.yml` entry (`rkn.staging.com`) is
+unused scaffolding from `trellis-cli new`, not an active site.
 
 Site repos are deployed from their own GitHub repos (`git@github.com-si:...`, `git@github.com-ae:...` — note
-the custom SSH host aliases per site), not pushed from this monorepo; `site-swedishinstitute/` and
-`site-aeinstitute/` here are meant to be local Bedrock checkouts used for editing before pushing to those
-repos.
+the custom SSH host aliases per site), never pushed from this monorepo.
 
-**Known gotcha:** as of 2026-08-21, both `site-aeinstitute/` and `site-swedishinstitute/` here are stale —
-each is committed as a plain directory inside this monorepo's own `.git` (no `.git` of its own, not a
-submodule) and only holds Bedrock scaffolding (`.gitkeep` placeholders, no theme code). The real code
-lives only in the actual per-site repos — `aeinstitute` (`git@github.com:agustin-gafa/aeinstitute.git`)
-and `swedishinstitute` (`git@github.com:agustin-gafa/swedishinstitute.git`) — each of which has its own
-`CLAUDE.md`, `README.md`, and `DEPLOYMENT.md`; read those directly for that site's architecture and deploy
-runbook instead of relying on these folders. On this machine, the real checkouts live under Devilbox at
-`/srv/http/devilbox/data/www/aeinstitute` and `/srv/http/devilbox/data/www/swedishinstitute` — not as
-siblings of `trellis/`. This is harmless for staging deploys (`trellis deploy` pulls from `repo:` on the
-server, not from `local_path`); these folders only matter if you actually want a self-contained sibling
-tree for `trellis-cli`, and would need the real repos cloned into them first.
+**Where the site code is.** In the per-site repos and nowhere else — `swedishinstitute`
+(`git@github.com:agustin-gafa/swedishinstitute.git`) and `aeinstitute`
+(`git@github.com:agustin-gafa/aeinstitute.git`), each with its own `CLAUDE.md`, `README.md` and
+`DEPLOYMENT.md`. Read those for that site's architecture and deploy runbook. Clone them wherever you
+like: the deploy pulls from `repo:` on the server, not from your disk.
 
 Each site's `web/app/plugins/*`, `web/app/themes/twentytwentyfive/`, and `web/wp` are gitignored — they're
 installed via Composer (`wp-theme/twentytwentyfive` is pulled as a Composer package), not committed.
@@ -47,9 +41,9 @@ installed via Composer (`wp-theme/twentytwentyfive` is pulled as a Composer pack
 ## Commands
 
 All Trellis (`trellis` CLI or raw `ansible-playbook`) commands run **from `trellis/`**. All Composer/Pest
-commands run **from the relevant `site-*/` directory**.
+commands run **from the clone of that site's own repo**.
 
-### Site (Bedrock) — run inside `site-swedishinstitute/` or `site-aeinstitute/`
+### Site (Bedrock) — run inside your clone of `swedishinstitute` or `aeinstitute`
 
 ```bash
 composer install              # install PHP dependencies
