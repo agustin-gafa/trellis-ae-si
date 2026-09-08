@@ -8,7 +8,7 @@ wordpress_sites:
     # sitio se clona aparte y el despliegue lo trae con git pull EN EL SERVIDOR.
     local_path: ../site-swedishinstitute
     branch: develop
-    repo: git@github.com-si:agustin-gafa/swedishinstitute.git
+    repo: git@github.com:agustin-gafa/swedishinstitute.git
     multisite:
       enabled: true
       subdomains: true
@@ -33,12 +33,12 @@ wordpress_sites:
     # Ver la nota de local_path de arriba.
     local_path: ../site-aeinstitute
     branch: develop
-    repo: git@github.com-ae:agustin-gafa/aeinstitute.git
+    repo: git@github.com:agustin-gafa/aeinstitute.git
     multisite:
       enabled: true
       subdomains: true
     env:
-      multisite: truedevelop
+      multisite: true
       wp_allow_multisite: true
       subdomain_install: true
       path_current_site: /
