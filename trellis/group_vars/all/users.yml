@@ -12,6 +12,8 @@ users:
       # - https://github.com/username.keys
       - https://github.com/j4rk0r.keys
       - https://github.com/juanpagotto.keys
+      - https://github.com/agustin-gafa.keys
+      - https://github.com/mcordoba.keys
   - name: "{{ admin_user }}"
     groups:
       - sudo
@@ -21,6 +23,8 @@ users:
       # - https://github.com/username.keys
       - https://github.com/j4rk0r.keys
       - https://github.com/juanpagotto.keys
+      - https://github.com/agustin-gafa.keys
+      - https://github.com/mcordoba.keys
 
 web_user: web
 web_group: www-data
