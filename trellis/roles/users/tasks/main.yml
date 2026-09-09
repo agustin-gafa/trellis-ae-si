@@ -90,6 +90,24 @@
     key: "{{ lookup('file', item) }}"
   with_fileglob: 'public_keys/*.pub'
 
+- name: Ensure the web user has an .ssh directory
+  file:
+    path: "/home/{{ web_user }}/.ssh"
+    state: directory
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: '0700'
+  when: web_ssh_host_aliases | default([]) | length > 0
+
+- name: Write the git host aliases the deploy clones through
+  template:
+    src: web_ssh_config.j2
+    dest: "/home/{{ web_user }}/.ssh/config"
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: '0600'
+  when: web_ssh_host_aliases | default([]) | length > 0
+
 - name: Check whether Ansible can connect as admin_user
   command: ansible {{ inventory_hostname }} -m ping -u {{ admin_user }} {{ cli_options | default('') }}
   delegate_to: localhost

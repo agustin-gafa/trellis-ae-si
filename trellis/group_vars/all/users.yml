@@ -30,3 +30,20 @@ web_user: web
 web_group: www-data
 web_sudoers:
   - "/usr/sbin/service php{{ php_version }}-fpm *"
+
+# SSH host aliases written to the web user's ~/.ssh/config. The deploy clones
+# each site through its own alias so that each repository is reached with its
+# own deploy key, and until now those entries existed only on the server.
+#
+# The private keys stay off the repository, which is public. They are placed by
+# hand at the paths below, once per server, and their public halves are added
+# as deploy keys on the matching GitHub repository.
+web_ssh_host_aliases:
+  - host: github.com-si
+    hostname: github.com
+    user: git
+    identity_file: ~/.ssh/deploy_key_si
+  - host: github.com-ae
+    hostname: github.com
+    user: git
+    identity_file: ~/.ssh/deploy_key_ae
