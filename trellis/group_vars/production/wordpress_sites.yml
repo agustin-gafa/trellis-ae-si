@@ -25,6 +25,14 @@ wordpress_sites:
       path_current_site: /
       site_id_current_site: 1
       blog_id_current_site: 1
+      # Modo ensayo de la tuberia de leads. En produccion la bandera SOLA no
+      # intercepta nada: modo-ensayo.php exige ademas que el cuerpo saliente
+      # lleve la marca @rockin-prueba.invalid, un TLD reservado por la RFC 2606
+      # que un lead real no puede contener. Asi se puede probar la tuberia de
+      # punta a punta sin postear un lead facturable, y una bandera olvidada no
+      # se traga el trafico real.
+      rockin_crm_dry_run: true
+
       # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
       # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
       mailgun_domain: send.swedishinstitute.edu
@@ -57,6 +65,14 @@ wordpress_sites:
       path_current_site: /
       site_id_current_site: 1
       blog_id_current_site: 1
+      # Modo ensayo de la tuberia de leads. En produccion la bandera SOLA no
+      # intercepta nada: modo-ensayo.php exige ademas que el cuerpo saliente
+      # lleve la marca @rockin-prueba.invalid, un TLD reservado por la RFC 2606
+      # que un lead real no puede contener. Asi se puede probar la tuberia de
+      # punta a punta sin postear un lead facturable, y una bandera olvidada no
+      # se traga el trafico real.
+      rockin_crm_dry_run: true
+
       # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
       # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
       mailgun_domain: mg.aeinstitute.net
