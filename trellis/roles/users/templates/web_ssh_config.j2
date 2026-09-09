@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+#
+# The deploy clones each site from its own GitHub alias, so these Host entries
+# have to exist for the web user or the clone fails. They used to live only on
+# the server, written by hand, which meant the machine could not be recreated
+# from the repository.
+#
+# The private keys are deliberately NOT in the repository: this one is public.
+# They are placed once, by hand, at the paths named below, and GitHub gets the
+# matching public key as a deploy key on each site.
+{% for alias in web_ssh_host_aliases %}
+
+Host {{ alias.host }}
+    HostName {{ alias.hostname }}
+    User {{ alias.user | default('git') }}
+    IdentityFile {{ alias.identity_file }}
+    IdentitiesOnly yes
+{% endfor %}
