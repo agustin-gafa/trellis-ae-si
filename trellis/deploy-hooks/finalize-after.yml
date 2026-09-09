@@ -1,0 +1,22 @@
+---
+# Trellis creates a missing shared child as an empty file. That is fine for most
+# things and fatal for this one: Defender only writes the key when the file does
+# not exist, so an empty file stays empty for ever, and reading it then asks for
+# a constant that was never defined, which is an Error on PHP 8.
+#
+# Removing it when it is empty puts things back to the state Defender knows how
+# to recover from: the file is missing, so it creates it with a real key the
+# next time two-factor is used. The symlink from the release is left alone; the
+# plugin writes through it and the key lands in shared.
+- name: Check the Defender key file in shared
+  ansible.builtin.stat:
+    path: "{{ deploy_helper.shared_path }}/wp-defender-secrets.php"
+  register: defender_key_file
+
+- name: Remove the Defender key file when it was created empty
+  ansible.builtin.file:
+    path: "{{ deploy_helper.shared_path }}/wp-defender-secrets.php"
+    state: absent
+  when:
+    - defender_key_file.stat.exists
+    - defender_key_file.stat.size == 0
