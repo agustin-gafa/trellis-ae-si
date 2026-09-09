@@ -35,6 +35,25 @@ project_shared_children:
   - path: "{{ project_public_path }}/{{ project_upload_path }}"
     src: uploads
 
+  # Defender keeps the two-factor secret in this file. A release is a fresh
+  # checkout and the file is gitignored, so without sharing it every deploy
+  # wipes it and everyone with two-factor set up is locked out until they
+  # configure it again. The mode matters: it is a secret.
+  - path: "{{ project_public_path }}/app/wp-defender-secrets.php"
+    src: wp-defender-secrets.php
+    mode: '0600'
+    type: file
+
+  # Hummingbird writes its logs here. Losing them on every deploy means there
+  # is never any history to look at when something is slow.
+  - path: "{{ project_public_path }}/app/wphb-logs"
+    src: wphb-logs
+
+  # The page cache is deliberately NOT shared: carrying it across releases
+  # would serve HTML built by the previous code after a deploy. Neither is
+  # advanced-cache.php, which resolves its own path from WP_CONTENT_DIR and
+  # regenerates itself correctly on the first request.
+
 # The project_environment is a list of environment variables that can be used in hooks
 # Example:
 # project_environment:
@@ -82,3 +101,4 @@ deploy_finalize_before:
 
 deploy_finalize_after:
   - "{{ playbook_dir }}/roles/deploy/hooks/finalize-after.yml"
+  - "{{ playbook_dir }}/deploy-hooks/finalize-after.yml"
