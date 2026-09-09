@@ -20,3 +20,21 @@
   when:
     - defender_key_file.stat.exists
     - defender_key_file.stat.size == 0
+
+# nginx serves by wildcard but the certificate only covers what site_hosts
+# declares, so a blog on an undeclared host answers with a TLS handshake that
+# fails. That is what a 525 behind a proxy actually is, and it is how the outage
+# of 1 September happened. This reports the mismatch on every deploy instead of
+# waiting for someone to notice it from the outside.
+- name: Check every blog host is covered by the certificate
+  ansible.builtin.script: >-
+    {{ playbook_dir }}/bin/check-network-hosts.sh
+    {{ deploy_helper.current_path }}
+    {{ wordpress_sites[site].site_hosts | map(attribute='canonical') | join(' ') }}
+  register: network_hosts_check
+  changed_when: false
+  failed_when: false
+
+- name: Show which blog hosts the certificate covers
+  ansible.builtin.debug:
+    msg: "{{ network_hosts_check.stdout_lines }}"
