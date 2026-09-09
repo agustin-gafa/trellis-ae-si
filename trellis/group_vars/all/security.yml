@@ -22,16 +22,20 @@ ferm_input_list:
     hits: 20
 
 
-# Enable built-in fail2ban services or add your own custom ones
+# Enable built-in fail2ban services or add your own custom ones.
+# Both WordPress jails were shipped disabled, which left the login and the
+# XML-RPC endpoint with no brake at all against a brute force run. The defaults
+# apply: six attempts, then a ten minute ban, with ip_whitelist never banned.
+# Ordinary visitors never touch either endpoint, so this does not reach them.
 fail2ban_services_custom:
   - name: wordpress_xmlrpc
     filter: wordpress-xmlrpc
-    enabled: "false"
+    enabled: "true"
     port: http,https
     logpath: "{{ www_root }}/**/logs/access.log"
   - name: wordpress_wp_login
     filter: wordpress-wp-login
-    enabled: "false"
+    enabled: "true"
     port: http,https
     logpath: "{{ www_root }}/**/logs/access.log"
 
