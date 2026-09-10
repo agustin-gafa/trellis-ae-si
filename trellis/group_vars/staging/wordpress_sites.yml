@@ -19,6 +19,13 @@ wordpress_sites:
       path_current_site: /
       site_id_current_site: 1
       blog_id_current_site: 1
+      # Modo ensayo de la tuberia de leads. Fuera de produccion la bandera
+      # intercepta TODOS los envios a los CRM, sin necesidad de marca en el
+      # cuerpo: PRE es donde se prueba y donde entra el cliente a revisar, asi
+      # que ningun formulario enviado aqui puede postear un lead real y
+      # facturable.
+      rockin_crm_dry_run: true
+
       mailgun_domain: send.swedishinstitute.edu
     ssl:
       enabled: true
@@ -44,6 +51,13 @@ wordpress_sites:
       path_current_site: /
       site_id_current_site: 1
       blog_id_current_site: 1
+      # Modo ensayo de la tuberia de leads. Fuera de produccion la bandera
+      # intercepta TODOS los envios a los CRM, sin necesidad de marca en el
+      # cuerpo: PRE es donde se prueba y donde entra el cliente a revisar, asi
+      # que ningun formulario enviado aqui puede postear un lead real y
+      # facturable.
+      rockin_crm_dry_run: true
+
       mailgun_domain: mg.aeinstitute.net
     ssl:
       enabled: true
