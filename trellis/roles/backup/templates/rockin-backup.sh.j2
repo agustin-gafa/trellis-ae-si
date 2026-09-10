@@ -1,0 +1,60 @@
+#!/bin/bash
+# Copia de seguridad de las bases de datos y los uploads de los sitios de este
+# servidor. Lo lanza rockin-backup.timer.
+#
+# Fichero generado por Ansible. No editar a mano: se sobrescribe en el
+# siguiente aprovisionamiento.
+set -euo pipefail
+
+STAGING="{{ backup_staging_dir }}"
+export RESTIC_REPOSITORY="{{ backup_restic_repo }}"
+export RESTIC_PASSWORD_FILE="{{ backup_password_file }}"
+{% for k, v in backup_restic_env.items() %}
+export {{ k }}="{{ v }}"
+{% endfor %}
+
+log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
+
+# El volcado se hace como el usuario del sitio y con wp-cli, que lee las
+# credenciales del .env: asi no hay ninguna contrasena en este script.
+volcar() {
+  local sitio="$1" destino="$2"
+  su -s /bin/bash -c "cd {{ www_root }}/${sitio}/current && wp db export - --single-transaction --quick --default-character-set=utf8mb4" {{ web_user }} \
+    | gzip -9 > "${destino}"
+}
+
+mkdir -p "${STAGING}"
+chmod 700 "${STAGING}"
+rm -f "${STAGING}"/*.sql.gz
+
+SELLO="$(date -u +%Y%m%d-%H%M%S)"
+RUTAS=()
+
+{% for name, site in wordpress_sites.items() %}
+log "volcando {{ name }}"
+volcar "{{ name }}" "${STAGING}/{{ name }}-${SELLO}.sql.gz"
+gzip -t "${STAGING}/{{ name }}-${SELLO}.sql.gz"
+log "  $(du -h "${STAGING}/{{ name }}-${SELLO}.sql.gz" | cut -f1)"
+{% if backup_include_uploads %}
+RUTAS+=("{{ www_root }}/{{ name }}/shared/uploads")
+{% endif %}
+{% endfor %}
+
+RUTAS+=("${STAGING}")
+
+log "restic backup"
+restic backup --verbose=0 --tag rockin --host "$(hostname)" "${RUTAS[@]}"
+
+log "restic forget"
+restic forget --tag rockin \
+  --keep-daily {{ backup_keep_daily }} \
+  --keep-weekly {{ backup_keep_weekly }} \
+  --keep-monthly {{ backup_keep_monthly }} \
+  --prune
+
+# Los volcados ya viven dentro de restic; dejarlos ademas sueltos duplicaria
+# datos personales de leads en el disco sin aportar nada.
+rm -f "${STAGING}"/*.sql.gz
+
+log "hecho"
+restic snapshots --tag rockin --latest 1

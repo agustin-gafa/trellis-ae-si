@@ -1,0 +1,29 @@
+---
+# Instala y activa las copias de seguridad en el servidor del entorno indicado.
+#
+#   ansible-playbook backup.yml -i hosts/production -e env=production
+#
+# Para lanzar una copia a mano, en el servidor:
+#   systemctl start rockin-backup.service
+#   journalctl -u rockin-backup.service -n 50
+#
+# Para recuperar:
+#   restic snapshots --tag rockin
+#   restic restore <id> --target /tmp/recuperado
+# con RESTIC_REPOSITORY y RESTIC_PASSWORD_FILE puestos, o leyendolos del
+# script /usr/local/sbin/rockin-backup.
+- import_playbook: variable-check.yml
+  vars:
+    playbook: backup.yml
+
+- name: Test Connection and Determine Remote User
+  hosts: web:&{{ env }}
+  gather_facts: false
+  roles:
+    - { role: connection, tags: [connection, always] }
+
+- name: Copias de seguridad de bases de datos y uploads
+  hosts: web:&{{ env }}
+  become: true
+  roles:
+    - { role: backup, tags: [backup], when: backup_enabled | default(false) }

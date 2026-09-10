@@ -1,0 +1,11 @@
+# Fichero generado por Ansible. No editar a mano.
+[Unit]
+Description=Lanza la copia de seguridad diaria (Rockin)
+
+[Timer]
+OnCalendar={{ backup_schedule }}
+RandomizedDelaySec=900
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,141 @@
+---
+- name: Instalar restic
+  apt:
+    name: restic
+    state: present
+    cache_valid_time: "{{ apt_cache_valid_time }}"
+
+- name: Crear los directorios de la copia
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+  loop:
+    - "{{ backup_staging_dir }}"
+    - "{{ backup_restic_repo if backup_restic_repo.startswith('/') else '/var/backups/rockin' }}"
+
+# La contrasena se genera en el servidor y no sale de el. El repositorio de
+# Trellis es publico, asi que no puede guardarla.
+- name: Generar la contrasena del repositorio si no existe
+  shell: |
+    set -o pipefail
+    umask 077
+    openssl rand -base64 48 > {{ backup_password_file }}
+  args:
+    creates: "{{ backup_password_file }}"
+    executable: /bin/bash
+
+- name: Asegurar los permisos de la contrasena
+  file:
+    path: "{{ backup_password_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Comprobar si el repositorio restic ya esta inicializado
+  command: restic cat config
+  environment:
+    RESTIC_REPOSITORY: "{{ backup_restic_repo }}"
+    RESTIC_PASSWORD_FILE: "{{ backup_password_file }}"
+  register: restic_config
+  changed_when: false
+  failed_when: false
+
+- name: Inicializar el repositorio restic
+  command: restic init
+  environment:
+    RESTIC_REPOSITORY: "{{ backup_restic_repo }}"
+    RESTIC_PASSWORD_FILE: "{{ backup_password_file }}"
+  when: restic_config.rc != 0
+
+- name: Instalar el script de copia
+  template:
+    src: rockin-backup.sh.j2
+    dest: /usr/local/sbin/rockin-backup
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Instalar la unidad y el temporizador
+  template:
+    src: "rockin-backup.{{ item }}.j2"
+    dest: "/etc/systemd/system/rockin-backup.{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - service
+    - timer
+  notify: reload systemd
+
+- name: Activar el temporizador
+  systemd:
+    name: rockin-backup.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+
+# Lanzar una copia sin esperar al temporizador:
+#   ansible-playbook backup.yml -i hosts/production -e env=production --tags run-now
+- name: Lanzar una copia ahora
+  systemd:
+    name: rockin-backup.service
+    state: started
+  tags: [never, run-now]
+
+# Estado de las copias:
+#   ansible-playbook backup.yml -i hosts/production -e env=production --tags check
+- name: Recoger el estado de las copias
+  shell: |
+    echo "temporizador: $(systemctl is-active rockin-backup.timer)"
+    systemctl list-timers rockin-backup.timer --no-pager | sed -n '2p'
+    echo "--- ultima ejecucion ---"
+    systemctl show rockin-backup.service -p Result -p ExecMainStatus
+    echo "--- snapshots ---"
+    restic snapshots --tag rockin --compact | tail -8
+    echo "--- tamano del repositorio ---"
+    du -sh {{ backup_restic_repo }} 2>/dev/null || true
+  environment:
+    RESTIC_REPOSITORY: "{{ backup_restic_repo }}"
+    RESTIC_PASSWORD_FILE: "{{ backup_password_file }}"
+  register: backup_estado
+  changed_when: false
+  tags: [never, check]
+
+- name: Mostrar el estado de las copias
+  debug:
+    var: backup_estado.stdout_lines
+  tags: [never, check]
+
+# Prueba de restauracion. Restaura los volcados del ultimo snapshot a un
+# directorio temporal, comprueba su integridad y cuenta las tablas de cada uno.
+# No toca ninguna base de datos.
+#   ansible-playbook backup.yml -i hosts/production -e env=production --tags restore-test
+- name: Probar una restauracion
+  shell: |
+    set -euo pipefail
+    DEST=/tmp/rockin-restore-test
+    rm -rf "$DEST"
+    restic restore latest --tag rockin --include {{ backup_staging_dir }} --target "$DEST" > /dev/null
+    for f in "$DEST"{{ backup_staging_dir }}/*.sql.gz; do
+      echo "fichero: $(basename "$f")"
+      gzip -t "$f" && echo "  integridad: OK"
+      echo "  tamano comprimido: $(du -h "$f" | cut -f1)"
+      echo "  tablas dentro: $(zcat "$f" | grep -c '^CREATE TABLE' || true)"
+    done
+    rm -rf "$DEST"
+  args:
+    executable: /bin/bash
+  environment:
+    RESTIC_REPOSITORY: "{{ backup_restic_repo }}"
+    RESTIC_PASSWORD_FILE: "{{ backup_password_file }}"
+  register: backup_prueba
+  changed_when: false
+  tags: [never, restore-test]
+
+- name: Mostrar la prueba de restauracion
+  debug:
+    var: backup_prueba.stdout_lines
+  tags: [never, restore-test]
