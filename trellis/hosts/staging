@@ -1,7 +1,12 @@
-# Staging fue dado de baja — el servidor ahora es production.
-# Ver hosts/production.
-
 # hosts/staging
+# PRE vive en 51.68.85.26 desde el 8-sep-2026, en OVH. Sustituye al servidor
+# anterior (178.156.218.135, Hetzner), que se destruyo el 6-sep para cerrar una
+# incidencia de 525 intermitentes en info.swedishinstitute.edu: ese nombre habia
+# acabado con dos origenes en Cloudflare. La regla que evita repetirlo es un
+# nombre, un origen.
+#
+# Despliega la rama develop, sobre los cuatro hosts *.rockinmedia.space.
+
 [staging]
 51.68.85.26
 
