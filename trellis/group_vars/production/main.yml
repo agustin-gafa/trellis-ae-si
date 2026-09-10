@@ -6,3 +6,9 @@ php_fpm_pm_start_servers: 4
 php_fpm_pm_min_spare_servers: 2
 php_fpm_pm_max_spare_servers: 6
 php_fpm_pm_max_requests: 500
+# Copias de seguridad. El destino por defecto es un repositorio restic en el
+# propio servidor: automatiza, da retencion y permite recuperar una tabla o un
+# fichero sueltos, pero NO protege de perder la maquina. Para eso hay que
+# apuntar backup_restic_repo fuera y poner sus credenciales en
+# backup_restic_env, que es la decision que sigue abierta.
+backup_enabled: true

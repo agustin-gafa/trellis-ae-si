@@ -1,0 +1,11 @@
+# Fichero generado por Ansible. No editar a mano.
+[Unit]
+Description=Copia de seguridad de bases de datos y uploads (Rockin)
+After=network-online.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Nice=10
+IOSchedulingClass=idle
+ExecStart=/usr/local/sbin/rockin-backup

@@ -1,0 +1,36 @@
+---
+# Copias de seguridad de las bases de datos y de los uploads.
+#
+# El destino por defecto es un repositorio restic EN EL PROPIO SERVIDOR. Eso
+# automatiza y da recuperacion granular, pero NO protege de perder la maquina:
+# para eso hay que apuntar backup_restic_repo a un destino externo (Storage Box,
+# S3, B2) y poner sus credenciales en backup_restic_env.
+backup_enabled: false
+
+# Donde se dejan los volcados antes de meterlos en restic.
+backup_staging_dir: /var/backups/rockin/sql
+
+# Repositorio restic. Cambiar a sftp:usuario@host:/ruta o s3:... para sacarlo
+# de la maquina.
+backup_restic_repo: /var/backups/rockin/restic
+
+# Variables de entorno extra para restic (credenciales del destino remoto).
+# Se escriben en un fichero solo legible por root.
+backup_restic_env: {}
+
+# La contrasena del repositorio se genera en el servidor la primera vez y se
+# queda en este fichero, propiedad de root y en modo 600. NO se guarda en el
+# repositorio git, que es publico.
+backup_password_file: /root/.rockin-restic-password
+
+# Retencion.
+backup_keep_daily: 30
+backup_keep_weekly: 8
+backup_keep_monthly: 6
+
+# Cuando se lanza. Formato de systemd OnCalendar.
+backup_schedule: "*-*-* 03:30:00"
+
+# Los uploads son unos 2 GB y cambian poco; restic deduplica, asi que el coste
+# diario despues de la primera copia son los deltas.
+backup_include_uploads: true
