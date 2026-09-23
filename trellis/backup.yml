@@ -3,6 +3,10 @@
 #
 #   ansible-playbook backup.yml -i hosts/production -e env=production
 #
+# El mismo playbook prepara el destino de la copia de fuera en el servidor que
+# tenga backup_offsite_authorized_keys (hoy, staging):
+#   ansible-playbook backup.yml -i hosts/staging -e env=staging
+#
 # Para lanzar una copia a mano, en el servidor:
 #   systemctl start rockin-backup.service
 #   journalctl -u rockin-backup.service -n 50
@@ -27,3 +31,11 @@
   become: true
   roles:
     - { role: backup, tags: [backup], when: backup_enabled | default(false) }
+
+- name: Destino de la copia de fuera de otros servidores
+  hosts: web:&{{ env }}
+  become: true
+  roles:
+    - role: backup-offsite-target
+      tags: [backup-offsite-target]
+      when: backup_offsite_authorized_keys | default([]) | length > 0

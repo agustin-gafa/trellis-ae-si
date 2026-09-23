@@ -1,0 +1,13 @@
+---
+# Destino de la copia de fuera de otro servidor.
+#
+# Crea un usuario que solo puede usar SFTP, con las claves de los servidores
+# que envian copia. Los repositorios restic que recibe estan cifrados con una
+# contrasena que no sale del servidor de origen, asi que este servidor guarda
+# los datos pero no puede leerlos.
+backup_offsite_user: rockin-backup
+backup_offsite_home: /var/backups/rockin-offsite
+
+# Partes publicas de las claves autorizadas, una por servidor de origen. La de
+# cada origen la imprime el rol backup al aprovisionarlo.
+backup_offsite_authorized_keys: []

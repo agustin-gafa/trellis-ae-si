@@ -50,6 +50,44 @@
     RESTIC_PASSWORD_FILE: "{{ backup_password_file }}"
   when: restic_config.rc != 0
 
+# Clave con la que este servidor entra en el destino de la copia de fuera. Se
+# genera aunque no haya destino todavia, para poder autorizarla antes.
+- name: Generar la clave de la copia de fuera si no existe
+  command: ssh-keygen -t ed25519 -N '' -C "rockin-backup@{{ inventory_hostname }}" -f {{ backup_offsite_key }}
+  args:
+    creates: "{{ backup_offsite_key }}"
+
+- name: Leer la parte publica de la clave de la copia de fuera
+  command: cat {{ backup_offsite_key }}.pub
+  register: backup_offsite_pubkey
+  changed_when: false
+
+- name: Mostrar la parte publica de la clave de la copia de fuera
+  debug:
+    msg: "{{ backup_offsite_pubkey.stdout }}"
+
+- name: Comprobar si el repositorio de fuera ya esta inicializado
+  command: restic -o sftp.command="{{ backup_offsite_sftp_command }}" -r {{ backup_offsite_repo }} cat config
+  environment:
+    RESTIC_PASSWORD_FILE: "{{ backup_password_file }}"
+  register: restic_offsite_config
+  changed_when: false
+  failed_when: false
+  when: backup_offsite_repo | length > 0
+
+# Mismos parametros de troceado que el local, para que copiar entre los dos
+# deduplique.
+- name: Inicializar el repositorio de fuera
+  command: >-
+    restic -o sftp.command="{{ backup_offsite_sftp_command }}" -r {{ backup_offsite_repo }}
+    init --from-repo {{ backup_restic_repo }} --from-password-file {{ backup_password_file }}
+    --copy-chunker-params
+  environment:
+    RESTIC_PASSWORD_FILE: "{{ backup_password_file }}"
+  when:
+    - backup_offsite_repo | length > 0
+    - restic_offsite_config.rc != 0
+
 - name: Instalar el script de copia
   template:
     src: rockin-backup.sh.j2
@@ -97,6 +135,10 @@
     restic snapshots --tag rockin --compact | tail -8
     echo "--- tamano del repositorio ---"
     du -sh {{ backup_restic_repo }} 2>/dev/null || true
+    {% if backup_offsite_repo %}
+    echo "--- snapshots fuera ({{ backup_offsite_repo }}) ---"
+    restic -o sftp.command="{{ backup_offsite_sftp_command }}" -r {{ backup_offsite_repo }} snapshots --tag rockin --compact | tail -8
+    {% endif %}
   environment:
     RESTIC_REPOSITORY: "{{ backup_restic_repo }}"
     RESTIC_PASSWORD_FILE: "{{ backup_password_file }}"
@@ -117,15 +159,23 @@
   shell: |
     set -euo pipefail
     DEST=/tmp/rockin-restore-test
-    rm -rf "$DEST"
-    restic restore latest --tag rockin --include {{ backup_staging_dir }} --target "$DEST" > /dev/null
-    for f in "$DEST"{{ backup_staging_dir }}/*.sql.gz; do
-      echo "fichero: $(basename "$f")"
-      gzip -t "$f" && echo "  integridad: OK"
-      echo "  tamano comprimido: $(du -h "$f" | cut -f1)"
-      echo "  tablas dentro: $(zcat "$f" | grep -c '^CREATE TABLE' || true)"
-    done
-    rm -rf "$DEST"
+    probar() {
+      rm -rf "$DEST"
+      restic "$@" restore latest --tag rockin --include {{ backup_staging_dir }} --target "$DEST" > /dev/null
+      for f in "$DEST"{{ backup_staging_dir }}/*.sql.gz; do
+        echo "fichero: $(basename "$f")"
+        gzip -t "$f" && echo "  integridad: OK"
+        echo "  tamano comprimido: $(du -h "$f" | cut -f1)"
+        echo "  tablas dentro: $(zcat "$f" | grep -c '^CREATE TABLE' || true)"
+      done
+      rm -rf "$DEST"
+    }
+    echo "=== copia local ==="
+    probar
+    {% if backup_offsite_repo %}
+    echo "=== copia de fuera ==="
+    probar -o "sftp.command={{ backup_offsite_sftp_command }}" -r {{ backup_offsite_repo }}
+    {% endif %}
   args:
     executable: /bin/bash
   environment:

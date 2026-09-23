@@ -56,5 +56,26 @@ restic forget --tag rockin \
 # datos personales de leads en el disco sin aportar nada.
 rm -f "${STAGING}"/*.sql.gz
 
-log "hecho"
 restic snapshots --tag rockin --latest 1
+{% if backup_offsite_repo %}
+
+# Segunda copia fuera de la maquina. Va despues de limpiar los volcados para
+# que un fallo del destino no deje datos personales sueltos en el disco; si
+# falla, la unidad termina en error y la copia local ya esta hecha.
+FUERA=(-o "sftp.command={{ backup_offsite_sftp_command }}" -r "{{ backup_offsite_repo }}")
+
+log "restic copy fuera"
+restic "${FUERA[@]}" copy --tag rockin \
+  --from-repo "${RESTIC_REPOSITORY}" --from-password-file "${RESTIC_PASSWORD_FILE}"
+
+log "restic forget fuera"
+restic "${FUERA[@]}" forget --tag rockin \
+  --keep-daily {{ backup_keep_daily }} \
+  --keep-weekly {{ backup_keep_weekly }} \
+  --keep-monthly {{ backup_keep_monthly }} \
+  --prune
+
+restic "${FUERA[@]}" snapshots --tag rockin --latest 1
+{% endif %}
+
+log "hecho"
