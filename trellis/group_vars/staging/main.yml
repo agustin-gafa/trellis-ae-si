@@ -1,2 +1,6 @@
 mysql_root_password: "{{ vault_mysql_root_password }}" # Define this variable in group_vars/staging/vault.yml
 php_memory_limit: 256M
+# Este servidor guarda la copia de fuera del de produccion: esta en otro
+# proveedor y otro centro de datos, asi que perder uno no se lleva el otro.
+backup_offsite_authorized_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMHMP8U7buMomjRzcG6ocvJAd2qsugDADa/SyTC5i1Vw rockin-backup@178.156.244.142

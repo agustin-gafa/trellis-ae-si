@@ -1,0 +1,25 @@
+---
+- name: Crear el usuario de la copia de fuera
+  user:
+    name: "{{ backup_offsite_user }}"
+    system: true
+    shell: /bin/sh
+    home: "{{ backup_offsite_home }}"
+    create_home: true
+
+- name: Cerrar el directorio del usuario de la copia de fuera
+  file:
+    path: "{{ backup_offsite_home }}"
+    state: directory
+    owner: "{{ backup_offsite_user }}"
+    group: "{{ backup_offsite_user }}"
+    mode: '0700'
+
+# restrict quita reenvios, terminal y agente; el comando forzado deja la clave
+# en SFTP y nada mas, aunque el cliente pida otra cosa.
+- name: Autorizar las claves de los servidores de origen
+  authorized_key:
+    user: "{{ backup_offsite_user }}"
+    key: "{{ backup_offsite_authorized_keys | join('\n') }}"
+    key_options: 'restrict,command="/usr/lib/openssh/sftp-server"'
+    exclusive: true

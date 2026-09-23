@@ -14,6 +14,18 @@ backup_staging_dir: /var/backups/rockin/sql
 # de la maquina.
 backup_restic_repo: /var/backups/rockin/restic
 
+# Segunda copia fuera de la maquina, en formato sftp:usuario@host:/ruta. Vacio
+# deja solo la copia local. Con valor, la copia local se mantiene igual y al
+# terminar cada ejecucion restic copia sus snapshots a este repositorio, que
+# lleva la misma retencion. Se autentica con una clave propia que se genera en
+# el servidor; su parte publica se autoriza en el destino con el rol
+# backup-offsite-target.
+backup_offsite_repo: ''
+backup_offsite_key: /root/.ssh/rockin-backup-offsite
+backup_offsite_sftp_command: >-
+  ssh -i {{ backup_offsite_key }} -o IdentitiesOnly=yes -o BatchMode=yes
+  -o StrictHostKeyChecking=accept-new {{ backup_offsite_repo.split(':')[1] }} -s sftp
+
 # Variables de entorno extra para restic (credenciales del destino remoto).
 # Se escriben en un fichero solo legible por root.
 backup_restic_env: {}
