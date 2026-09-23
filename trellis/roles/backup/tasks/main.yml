@@ -159,15 +159,23 @@
   shell: |
     set -euo pipefail
     DEST=/tmp/rockin-restore-test
-    rm -rf "$DEST"
-    restic restore latest --tag rockin --include {{ backup_staging_dir }} --target "$DEST" > /dev/null
-    for f in "$DEST"{{ backup_staging_dir }}/*.sql.gz; do
-      echo "fichero: $(basename "$f")"
-      gzip -t "$f" && echo "  integridad: OK"
-      echo "  tamano comprimido: $(du -h "$f" | cut -f1)"
-      echo "  tablas dentro: $(zcat "$f" | grep -c '^CREATE TABLE' || true)"
-    done
-    rm -rf "$DEST"
+    probar() {
+      rm -rf "$DEST"
+      restic "$@" restore latest --tag rockin --include {{ backup_staging_dir }} --target "$DEST" > /dev/null
+      for f in "$DEST"{{ backup_staging_dir }}/*.sql.gz; do
+        echo "fichero: $(basename "$f")"
+        gzip -t "$f" && echo "  integridad: OK"
+        echo "  tamano comprimido: $(du -h "$f" | cut -f1)"
+        echo "  tablas dentro: $(zcat "$f" | grep -c '^CREATE TABLE' || true)"
+      done
+      rm -rf "$DEST"
+    }
+    echo "=== copia local ==="
+    probar
+    {% if backup_offsite_repo %}
+    echo "=== copia de fuera ==="
+    probar -o "sftp.command={{ backup_offsite_sftp_command }}" -r {{ backup_offsite_repo }}
+    {% endif %}
   args:
     executable: /bin/bash
   environment:
