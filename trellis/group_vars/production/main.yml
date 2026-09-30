@@ -1,7 +1,7 @@
 mysql_root_password: "{{ vault_mysql_root_password }}"
 php_memory_limit: 256M
 php_fpm_pm: dynamic
-php_fpm_pm_max_children: 20
+php_fpm_pm_max_children: 26
 php_fpm_pm_start_servers: 4
 php_fpm_pm_min_spare_servers: 2
 php_fpm_pm_max_spare_servers: 6
