@@ -48,6 +48,9 @@ wordpress_sites:
     # decir, todo el CSS, el JS y las fuentes. Por eso va el dominio real y no
     # el host de trabajo, y por eso el orden no es cosmetico.
     site_hosts:
+      - canonical: aeinstitute.net
+        redirects:
+          - www.aeinstitute.net
       - canonical: info.aeinstitute.net
     # - canonical: staging-ae.rockinmedia.space
     # - canonical: info.staging-ae.rockinmedia.space
