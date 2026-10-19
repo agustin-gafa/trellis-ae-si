@@ -81,6 +81,9 @@ wordpress_sites:
       # punta a punta sin postear un lead facturable, y una bandera olvidada no
       # se traga el trafico real.
       rockin_crm_dry_run: true
+      # Sin campaña, las UTM de los formularios salen vacías y el campo
+      # attribution_status dice por qué, en lugar de un valor de reserva fijo.
+      rockin_utm_sin_reserva: true
 
       # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
       # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
