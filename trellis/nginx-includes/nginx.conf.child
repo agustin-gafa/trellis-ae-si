@@ -1,0 +1,13 @@
+{% extends 'roles/nginx/templates/nginx.conf.j2' %}
+
+{% block http_includes_d -%}
+{{ super() }}
+  # Un único contador para el rastreador de Facebook, venga de la IP que venga: sus avalanchas
+  # llegan desde cientos de direcciones a la vez y, sin tope, ocupan todos los procesos de PHP
+  # que comparten las dos marcas. Las peticiones con clave vacía no se cuentan.
+  map $http_user_agent $limite_facebook {
+    default "";
+    ~*facebookexternalhit facebookexternalhit;
+  }
+  limit_req_zone $limite_facebook zone=facebook:1m rate=5r/s;
+  {% endblock -%}
