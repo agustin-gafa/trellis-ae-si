@@ -9,19 +9,22 @@
 # php_extensions_default:
 #   php8.2-bcmath: "{{ apt_package_state }}"
 #
+# PHP packages use apt_security_package_state (latest) so every `trellis provision`
+# pulls the newest patch release from the ondrej/php PPA (e.g. 8.3.36 for
+# CVE-2026-109618/109619). With apt_package_state (present) they never upgrade.
 php_extensions_default:
-  "php{{ php_version }}-bcmath": "{{ apt_package_state }}"
-  "php{{ php_version }}-cli": "{{ apt_package_state }}"
-  "php{{ php_version }}-curl": "{{ apt_package_state }}"
-  "php{{ php_version }}-dev": "{{ apt_package_state }}"
-  "php{{ php_version }}-fpm": "{{ apt_package_state }}"
-  "php{{ php_version }}-imagick": "{{ apt_package_state }}"
-  "php{{ php_version }}-intl": "{{ apt_package_state }}"
-  "php{{ php_version }}-mbstring": "{{ apt_package_state }}"
-  "php{{ php_version }}-mysql": "{{ apt_package_state }}"
-  "php{{ php_version }}-xml": "{{ apt_package_state }}"
-  "php{{ php_version }}-xmlrpc": "{{ apt_package_state }}"
-  "php{{ php_version }}-zip": "{{ apt_package_state }}"
+  "php{{ php_version }}-bcmath": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-cli": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-curl": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-dev": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-fpm": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-imagick": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-intl": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-mbstring": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-mysql": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-xml": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-xmlrpc": "{{ apt_security_package_state }}"
+  "php{{ php_version }}-zip": "{{ apt_security_package_state }}"
 
 php_memcached_packages:
   "php{{ php_version }}-memcached": "{{ apt_package_state }}"
