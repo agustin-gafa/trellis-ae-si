@@ -1,0 +1,4 @@
+# Tope para el rastreador de Facebook (zona definida en nginx.conf): lo que pase de la ráfaga
+# recibe un 429 y el rastreador vuelve a intentarlo más tarde.
+limit_req zone=facebook burst=30 nodelay;
+limit_req_status 429;
