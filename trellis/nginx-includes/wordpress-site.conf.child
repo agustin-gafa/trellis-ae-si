@@ -1,0 +1,10 @@
+{% extends 'roles/wordpress-setup/templates/wordpress-site.conf.j2' %}
+
+{% block multisite_rewrites -%}
+  # Imágenes enlazadas con la ruta de la web anterior (WordPress clásico, /wp-content/uploads/).
+  # Tiene que ir antes de las reescrituras de multisitio: la de /wp-content/ acaba en «last» y
+  # mandaría estas peticiones a /wp/wp-content/, donde no existen.
+  rewrite ^/wp-content/uploads/(.*)$ /app/uploads/$1 permanent;
+
+  {{ super() }}
+{%- endblock %}
