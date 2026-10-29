@@ -1,5 +1,6 @@
 wordpress_sites:
   swedishinstitute.edu:
+    nginx_wordpress_site_conf: "{{ playbook_dir }}/nginx-includes/wordpress-site.conf.child"
     site_hosts:
     # Lo ajusto para que quede como prioridad al crear el .env al desplegar,
     # cuando hay mas host no va bien
@@ -49,6 +50,7 @@ wordpress_sites:
       enabled: false
 
   aeinstitute.net:
+    nginx_wordpress_site_conf: "{{ playbook_dir }}/nginx-includes/wordpress-site.conf.child"
     # El primer canonical es el que Trellis escribe en WP_HOME y WP_SITEURL del
     # .env, y de ahi salen plugins_url(), content_url() y el URI del tema: es
     # decir, todo el CSS, el JS y las fuentes. Por eso va el dominio real y no
