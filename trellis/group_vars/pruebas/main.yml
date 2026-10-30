@@ -1,0 +1,16 @@
+mysql_root_password: "{{ vault_mysql_root_password }}"
+php_memory_limit: 256M
+php_fpm_pm: dynamic
+php_fpm_pm_max_children: 26
+php_fpm_pm_start_servers: 4
+php_fpm_pm_min_spare_servers: 2
+php_fpm_pm_max_spare_servers: 6
+php_fpm_pm_max_requests: 500
+# Copias de seguridad. Un repositorio restic en el propio servidor, para
+# recuperar rapido una tabla o un fichero sueltos, y una segunda copia en el
+# servidor de staging, que esta en otro proveedor y otro centro de datos: es la
+# que protege de perder esta maquina.
+# Sin copias en pruebas: escribirian en el mismo repositorio restic externo
+# que el servidor de produccion actual.
+backup_enabled: false
+backup_offsite_repo: sftp:rockin-backup@51.68.85.26:/var/backups/rockin-offsite/restic

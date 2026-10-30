@@ -1,0 +1,113 @@
+wordpress_sites:
+  swedishinstitute.edu:
+    nginx_wordpress_site_conf: "{{ playbook_dir }}/nginx-includes/wordpress-site.conf.child"
+    site_hosts:
+    # Lo ajusto para que quede como prioridad al crear el .env al desplegar,
+    # cuando hay mas host no va bien
+      - canonical: www.swedishinstitute.edu
+        redirects:
+          - swedishinstitute.edu
+      - canonical: info.swedishinstitute.edu
+      # - canonical: staging-si.rockinmedia.space
+      # - canonical: info.staging-si.rockinmedia.space
+      # Un host solo entra aqui cuando su DNS ya apunta a este servidor: Let's
+      # Encrypt valida por HTTP y, si el dominio resuelve a otro sitio, la
+      # emision falla y aborta el aprovisionamiento entero.
+    # local_path lo espera Trellis, pero no lo lee ningun playbook: solo sale en
+    # los ejemplos comentados de deploy-hooks/build-before.yml. El codigo del
+    # sitio se clona aparte y el despliegue lo trae con git pull EN EL SERVIDOR.
+    local_path: ../site-swedishinstitute
+    branch: main
+    repo: git@github.com-si:agustin-gafa/swedishinstitute.git
+    multisite:
+      enabled: true
+      subdomains: true
+    env:
+      multisite: true
+      wp_allow_multisite: true
+      subdomain_install: true
+      path_current_site: /
+      site_id_current_site: 1
+      blog_id_current_site: 1
+      # El entorno se llama pruebas, pero el sitio debe comportarse como en
+      # produccion (config/environments/production.php, WP_ENVIRONMENT_TYPE).
+      wp_env: production
+      # Modo ensayo de la tuberia de leads. En produccion la bandera SOLA no
+      # intercepta nada: modo-ensayo.php exige ademas que el cuerpo saliente
+      # lleve la marca @rockin-prueba.invalid, un TLD reservado por la RFC 2606
+      # que un lead real no puede contener. Asi se puede probar la tuberia de
+      # punta a punta sin postear un lead facturable, y una bandera olvidada no
+      # se traga el trafico real.
+      rockin_crm_dry_run: true
+      # Sin campaña, las UTM de los formularios salen vacías y el campo
+      # attribution_status dice por qué, en lugar de un valor de reserva fijo.
+      rockin_utm_sin_reserva: true
+
+      # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
+      # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
+      mailgun_domain: send.swedishinstitute.edu
+    ssl:
+      enabled: true
+      # Let's Encrypt valida por HTTP y los dominios aun apuntan al servidor
+      # actual: la emision fallaria y abortaria el aprovisionamiento. Hasta
+      # mover el DNS, certificado autofirmado. hsts_max_age 0 para que el
+      # navegador no se quede con HSTS de esta maquina.
+      provider: self-signed
+      hsts_max_age: 0
+    cache:
+      enabled: false
+
+  aeinstitute.net:
+    nginx_wordpress_site_conf: "{{ playbook_dir }}/nginx-includes/wordpress-site.conf.child"
+    # El primer canonical es el que Trellis escribe en WP_HOME y WP_SITEURL del
+    # .env, y de ahi salen plugins_url(), content_url() y el URI del tema: es
+    # decir, todo el CSS, el JS y las fuentes. Por eso va el dominio real y no
+    # el host de trabajo, y por eso el orden no es cosmetico.
+    site_hosts:
+      - canonical: aeinstitute.net
+        redirects:
+          - www.aeinstitute.net
+      - canonical: info.aeinstitute.net
+    # - canonical: staging-ae.rockinmedia.space
+    # - canonical: info.staging-ae.rockinmedia.space
+    # Ver la nota de local_path de arriba.
+    local_path: ../site-aeinstitute
+    branch: main
+    repo: git@github.com-ae:agustin-gafa/aeinstitute.git
+    multisite:
+      enabled: true
+      subdomains: true
+    env:
+      multisite: true
+      wp_allow_multisite: true
+      subdomain_install: true
+      path_current_site: /
+      site_id_current_site: 1
+      blog_id_current_site: 1
+      # El entorno se llama pruebas, pero el sitio debe comportarse como en
+      # produccion (config/environments/production.php, WP_ENVIRONMENT_TYPE).
+      wp_env: production
+      # Modo ensayo de la tuberia de leads. En produccion la bandera SOLA no
+      # intercepta nada: modo-ensayo.php exige ademas que el cuerpo saliente
+      # lleve la marca @rockin-prueba.invalid, un TLD reservado por la RFC 2606
+      # que un lead real no puede contener. Asi se puede probar la tuberia de
+      # punta a punta sin postear un lead facturable, y una bandera olvidada no
+      # se traga el trafico real.
+      rockin_crm_dry_run: true
+      # Sin campaña, las UTM de los formularios salen vacías y el campo
+      # attribution_status dice por qué, en lugar de un valor de reserva fijo.
+      rockin_utm_sin_reserva: true
+
+      # FluentSMTP lee la clave y el dominio de Mailgun como constantes; sin
+      # ellos la peticion sale contra una URL incompleta y no se manda ni un correo.
+      mailgun_domain: mg.aeinstitute.net
+    ssl:
+      enabled: true
+      # Let's Encrypt valida por HTTP y los dominios aun apuntan al servidor
+      # actual: la emision fallaria y abortaria el aprovisionamiento. Hasta
+      # mover el DNS, certificado autofirmado. hsts_max_age 0 para que el
+      # navegador no se quede con HSTS de esta maquina.
+      provider: self-signed
+      hsts_max_age: 0
+    cache:
+      enabled: false
