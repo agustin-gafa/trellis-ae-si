@@ -1,10 +1,10 @@
-# hosts/pruebas
+# hosts/prodrockin
 # Servidor nuevo de produccion (51.161.83.6) mientras se prueba, antes de
-# mover el DNS. Usa la misma configuracion que production (group_vars/pruebas
+# mover el DNS. Usa la misma configuracion que production (group_vars/prodrockin
 # es una copia), salvo los certificados, que son autofirmados hasta que los
 # dominios apunten aqui.
 
-[pruebas]
+[prodrockin]
 51.161.83.6
 
 [web]

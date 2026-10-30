@@ -29,7 +29,10 @@ wordpress_sites:
       path_current_site: /
       site_id_current_site: 1
       blog_id_current_site: 1
-      # El entorno se llama pruebas, pero el sitio debe comportarse como en
+      # Se fija el nombre de antes del renombrado: por defecto sale del entorno
+      # (swedishinstitute_edu_prodrockin) y apuntaria a una base vacia.
+      db_name: swedishinstitute_edu_pruebas
+      # El entorno se llama prodrockin, pero el sitio debe comportarse como en
       # produccion (config/environments/production.php, WP_ENVIRONMENT_TYPE).
       wp_env: production
       # Modo ensayo de la tuberia de leads. En produccion la bandera SOLA no
@@ -84,7 +87,10 @@ wordpress_sites:
       path_current_site: /
       site_id_current_site: 1
       blog_id_current_site: 1
-      # El entorno se llama pruebas, pero el sitio debe comportarse como en
+      # Se fija el nombre de antes del renombrado: por defecto sale del entorno
+      # (aeinstitute_net_prodrockin) y apuntaria a una base vacia.
+      db_name: aeinstitute_net_pruebas
+      # El entorno se llama prodrockin, pero el sitio debe comportarse como en
       # produccion (config/environments/production.php, WP_ENVIRONMENT_TYPE).
       wp_env: production
       # Modo ensayo de la tuberia de leads. En produccion la bandera SOLA no
