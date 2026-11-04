@@ -1,5 +1,42 @@
 {% extends 'roles/wordpress-setup/templates/wordpress-site.conf.j2' %}
 
+{% block cache_conditions -%}
+  {% if fastcgi_cache_enabled -%}
+  # Fastcgi cache conditions. Igual que en Trellis, salvo la consulta: solo se usa la caché con un
+  # rastreador y una consulta vacía o de campaña ($cache_para_rastreador en nginx.conf).
+  set $skip_cache 0;
+
+  # Skip requests with HTTP methods that should not be cached: DELETE, OPTIONS, PATCH, POST, PUT
+  if ($request_method !~ ^(GET|HEAD)$) {
+    set $skip_cache 1;
+  }
+
+  if ($cache_para_rastreador = 0) {
+    set $skip_cache 1;
+  }
+  if ($request_uri ~* "{{ item.value.cache.skip_cache_uri | default(nginx_skip_cache_uri) }}") {
+    set $skip_cache 1;
+  }
+  if ($http_cookie ~* "{{ item.value.cache.skip_cache_cookie | default(nginx_skip_cache_cookie) }}") {
+    set $skip_cache 1;
+  }
+
+  {% endif -%}
+{% endblock -%}
+
+{% block location_php_basic -%}
+    # Topes por IP (zonas en nginx.conf.child). Solo en PHP: los ficheros estaticos no ocupan
+    # workers, y una pagina sin cachear en Cloudflare pide decenas de ellos de golpe.
+    # Un limit_req aqui anula los del nivel server, asi que se repite el del rastreador de
+    # Facebook (nginx-includes/all/limite-facebook.conf.j2) para que siga valiendo en PHP.
+    limit_req zone=facebook burst=30 nodelay;
+    limit_req zone=por_ip burst={{ nginx_limite_ip_burst | default(40) }} nodelay;
+    limit_req zone=login_por_ip burst={{ nginx_limite_login_burst | default(10) }} nodelay;
+    limit_req_status 429;
+
+    {{ super() }}
+{%- endblock %}
+
 {% block multisite_rewrites -%}
   # Imágenes enlazadas con la ruta de la web anterior (WordPress clásico, /wp-content/uploads/).
   # Tiene que ir antes de las reescrituras de multisitio: la de /wp-content/ acaba en «last» y

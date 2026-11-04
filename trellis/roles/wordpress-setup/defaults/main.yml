@@ -74,6 +74,11 @@ php_fpm_pm_start_servers: 1
 php_fpm_pm_min_spare_servers: 1
 php_fpm_pm_max_spare_servers: 3
 php_fpm_pm_max_requests: 500
+php_fpm_listen_backlog: 511
+# 0 = no limit; slowlog disabled when the timeout is 0.
+php_fpm_request_terminate_timeout: 0
+php_fpm_slowlog_timeout: 0
+php_fpm_slowlog_path: /var/log/php{{ php_version }}-fpm-slow.log
 
 # Optional hardening mode: run php-fpm as a non-deploy user and grant writes only to writable paths.
 # Add extra writable paths as needed (for example current/web/app/cache).

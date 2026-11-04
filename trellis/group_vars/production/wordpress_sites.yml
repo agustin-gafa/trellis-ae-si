@@ -46,8 +46,11 @@ wordpress_sites:
     ssl:
       enabled: true
       provider: letsencrypt
+    # Cache de pagina solo para rastreadores (ver nginx-includes/nginx.conf.child): a las
+    # personas las atiende siempre PHP por la atribucion de los leads.
     cache:
-      enabled: false
+      enabled: true
+      duration: 10m
 
   aeinstitute.net:
     nginx_wordpress_site_conf: "{{ playbook_dir }}/nginx-includes/wordpress-site.conf.child"
@@ -93,5 +96,8 @@ wordpress_sites:
     ssl:
       enabled: true
       provider: letsencrypt
+    # Cache de pagina solo para rastreadores (ver nginx-includes/nginx.conf.child): a las
+    # personas las atiende siempre PHP por la atribucion de los leads.
     cache:
-      enabled: false
+      enabled: true
+      duration: 10m

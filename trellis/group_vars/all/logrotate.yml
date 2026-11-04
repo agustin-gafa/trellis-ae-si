@@ -18,3 +18,15 @@ logrotate_scripts:
               run-parts /etc/logrotate.d/httpd-prerotate; \
             fi \
       postrotate: service nginx reload >/dev/null 2>&1
+  - name: php-fpm-slowlog
+    path: /var/log/php{{ php_version }}-fpm-slow.log
+    options:
+      - weekly
+      - maxsize 50M
+      - missingok
+      - rotate 8
+      - compress
+      - delaycompress
+      - notifempty
+    scripts:
+      postrotate: /usr/lib/php/php{{ php_version }}-fpm-reopenlogs
