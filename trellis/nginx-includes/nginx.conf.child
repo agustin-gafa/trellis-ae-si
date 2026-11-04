@@ -1,7 +1,94 @@
 {% extends 'roles/nginx/templates/nginx.conf.j2' %}
 
+{% block cache -%}
+  # Setup the fastcgi cache.
+  fastcgi_buffers {{ nginx_fastcgi_buffers }};
+  fastcgi_buffer_size {{ nginx_fastcgi_buffer_size }};
+  fastcgi_read_timeout {{ nginx_fastcgi_read_timeout }};
+  fastcgi_cache_path {{ nginx_cache_path }} levels=1:2 keys_zone=wordpress:{{ nginx_cache_key_storage_size }} max_size={{ nginx_cache_size }} inactive={{ nginx_cache_inactive }};
+  fastcgi_cache_use_stale {{ nginx_cache_use_stale }};
+  fastcgi_cache_lock on;
+  # Igual que la clave de Trellis, salvo la URI: ver $clave_cache_uri abajo.
+  fastcgi_cache_key $realpath_root$scheme$host$clave_cache_uri$request_method$http_origin$http_x_http_method_override;
+  fastcgi_ignore_headers Expires Set-Cookie;
+  fastcgi_pass_header Set-Cookie;
+  fastcgi_pass_header Cookie;
+
+  # La caché de página es solo para rastreadores. A una persona la tiene que atender PHP siempre:
+  # el plugin de atribución (rockin-atribucion-ultimo-contacto) escribe en esa petición la cookie
+  # con las UTM, el clic y la página de entrada, y pinta con ella los campos ocultos de los
+  # formularios. Servirle una copia perderia la atribucion del lead.
+  # A un rastreador no le hace falta nada de eso, y en campaña son buena parte de las rafagas:
+  # previsualizaciones de Meta, comprobaciones de anuncios de Google.
+  map $http_user_agent $es_rastreador {
+    default 0;
+    ~*(facebookexternalhit|meta-externalagent|meta-externalfetcher|HatchFeed|AdsBot-Google|Googlebot|bingbot|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot) 1;
+  }
+
+  # Consulta vacia o solo con parametros de campaña. Los anuncios enlazan con ellos y no cambian
+  # la pagina que ve un rastreador, asi que todas esas variantes comparten una copia.
+  map $args $args_solo_campana {
+    default 0;
+    "" 1;
+    "~^(?:(?:utm_[a-z_]+|fbclid|gclid|gbraid|wbraid|msclkid|gad_source|gad_campaignid|_gl)(?:=[^&]*)?(?:&|$))+$" 1;
+  }
+
+  map "$es_rastreador:$args_solo_campana" $cache_para_rastreador {
+    default 0;
+    "1:1"   1;
+  }
+
+  map $request_uri $ruta_sin_args {
+    "~^(?<ruta>[^?]*)" $ruta;
+  }
+
+  # Prefijo propio para que una copia de rastreador no la pueda usar nunca una peticion de persona.
+  map $cache_para_rastreador $clave_cache_uri {
+    default $request_uri;
+    1       "rastreador:$ruta_sin_args";
+  }
+  {% endblock %}
+
 {% block http_includes_d -%}
 {{ super() }}
+  # IP real del visitante. Todo llega a traves de Cloudflare, asi que sin esto $remote_addr es
+  # la IP de Cloudflare en los logs, en PHP y en cualquier limite por IP. Solo se confia en la
+  # cabecera si la conexion viene de uno de sus rangos (group_vars/all/cloudflare.yml).
+  {% for rango in cloudflare_ips %}
+  set_real_ip_from {{ rango }};
+  {% endfor %}
+  real_ip_header CF-Connecting-IP;
+
+  # Topes por IP para las peticiones a PHP (se aplican en wordpress-site.conf.child). Necesitan la
+  # IP real de arriba: con la de Cloudflare, el tope lo compartirian miles de visitantes.
+  # Exentos el propio servidor (comprobaciones de salud de WordPress, cron) y localhost.
+  geo $limite_ip_exento {
+    default 0;
+    127.0.0.0/8 1;
+    ::1 1;
+    {% if inventory_hostname is match('^[0-9.]+$') %}
+    {{ inventory_hostname }} 1;
+    {% endif %}
+  }
+  map $limite_ip_exento $limite_ip_clave {
+    default $binary_remote_addr;
+    1       "";
+  }
+  # Una visita con PixelYourSite pide a PHP unas 5-10 cosas (la pagina, admin-ajax, los eventos
+  # de Meta) en un par de segundos: el tope sostenido y la rafaga lo cubren con holgura, tambien
+  # para varias personas tras la misma IP (wifi del campus, redes moviles). Un scraper que pide
+  # 25-30 por segundo se queda en 5 y no puede quedarse con todos los workers.
+  limit_req_zone $limite_ip_clave zone=por_ip:10m rate={{ nginx_limite_ip_rate | default('5r/s') }};
+
+  # Fuerza bruta: el envio del formulario de acceso y xmlrpc.php. fail2ban no sirve aqui: bloquea
+  # en el cortafuegos la IP del atacante, pero al servidor solo le conecta Cloudflare.
+  map "$limite_ip_exento:$request_method:$request_uri" $limite_login_clave {
+    default "";
+    "~^0:POST:/(wp/)?wp-login\.php" $binary_remote_addr;
+    "~^0:[A-Z]+:/(wp/)?xmlrpc\.php" $binary_remote_addr;
+  }
+  limit_req_zone $limite_login_clave zone=login_por_ip:10m rate={{ nginx_limite_login_rate | default('10r/m') }};
+
   # Un único contador para el rastreador de Facebook, venga de la IP que venga: sus avalanchas
   # llegan desde cientos de direcciones a la vez y, sin tope, ocupan todos los procesos de PHP
   # que comparten las dos marcas. Las peticiones con clave vacía no se cuentan.

@@ -1,11 +1,48 @@
 mysql_root_password: "{{ vault_mysql_root_password }}"
 php_memory_limit: 256M
-php_fpm_pm: dynamic
-php_fpm_pm_max_children: 26
-php_fpm_pm_start_servers: 4
-php_fpm_pm_min_spare_servers: 2
-php_fpm_pm_max_spare_servers: 6
+
+# PHP-FPM para aguantar las rafagas de campaña (Meta, Google, bots).
+# static: todos los workers arrancan con el servicio. Con dynamic el pool crecia
+# de 2 en 2 por segundo y en una rafaga de ~25 req/s llegaba al tope con 0 idle
+# mientras la CPU estaba casi ociosa.
+# Tope de workers: 2 vCPU / 3,8 GB. El pico medido en el servidor actual
+# fue 2,1 GB con 26 workers; 20 deja ~1,5 GB para MariaDB, Nginx y margen.
+php_fpm_pm: static
+php_fpm_pm_max_children: 20
+# Con static solo cuenta max_children; estos quedan coherentes por si se vuelve a dynamic.
+php_fpm_pm_start_servers: 20
+php_fpm_pm_min_spare_servers: 20
+php_fpm_pm_max_spare_servers: 20
 php_fpm_pm_max_requests: 500
+# Cola del socket: las peticiones que llegan con todos los workers ocupados
+# esperan aqui en lugar de devolver 502 al instante.
+php_fpm_listen_backlog: 4096
+# max_execution_time solo cuenta CPU: un worker esperando una API externa
+# (p. ej. eventos de PixelYourSite a Meta) puede colgarse indefinidamente.
+# Nginx abandona a los 60 s (fastcgi_read_timeout, 120 s por defecto en Trellis),
+# asi que pasado ese tiempo nadie recibe la respuesta: se mata el worker y se libera.
+nginx_fastcgi_read_timeout: 60s
+php_fpm_request_terminate_timeout: 60s
+# Traza de las peticiones de mas de 2 s en /var/log/php8.3-fpm-slow.log, para
+# ver en que espera PHP durante las rafagas.
+php_fpm_slowlog_timeout: 2s
+# Si 10 workers mueren por SIGSEGV/SIGBUS en 1 minuto (OPcache corrupto),
+# PHP-FPM se reinicia solo en lugar de seguir devolviendo 502.
+php_fpm_set_emergency_restart_threshold: true
+php_fpm_emergency_restart_threshold: 10
+php_fpm_set_emergency_restart_interval: true
+php_fpm_emergency_restart_interval: 1m
+
+# OPcache: con los valores por defecto (4000 ficheros, 128 MB) no caben dos
+# multisitios con sus plugins y PHP recompila en cada peticion lo que no cabe.
+php_opcache_memory_consumption: 256
+php_opcache_interned_strings_buffer: 32
+php_opcache_max_accelerated_files: 30000
+
+# Con updating, mientras una copia caducada se regenera en segundo plano
+# (fastcgi_cache_background_update de Trellis) los demas reciben la anterior en
+# lugar de esperar a PHP. Sin updating esa regeneracion no llega a funcionar.
+nginx_cache_use_stale: error timeout updating invalid_header http_500 http_503
 # Copias de seguridad. Un repositorio restic en el propio servidor, para
 # recuperar rapido una tabla o un fichero sueltos, y una segunda copia en el
 # servidor de staging, que esta en otro proveedor y otro centro de datos: es la
