@@ -48,12 +48,11 @@ wordpress_sites:
       mailgun_domain: send.swedishinstitute.edu
     ssl:
       enabled: true
-      # Let's Encrypt valida por HTTP y los dominios aun apuntan al servidor
-      # actual: la emision fallaria y abortaria el aprovisionamiento. Hasta
-      # mover el DNS, certificado autofirmado. hsts_max_age 0 para que el
-      # navegador no se quede con HSTS de esta maquina.
-      provider: self-signed
-      hsts_max_age: 0
+      # Let's Encrypt valida por HTTP: aprovisionar solo cuando TODOS los
+      # site_hosts y sus redirects ya resuelvan a este servidor, o la prueba de
+      # retos falla y aborta el aprovisionamiento entero. HSTS por defecto
+      # (1 año), como en production.
+      provider: letsencrypt
     # Cache de pagina solo para rastreadores (ver nginx-includes/nginx.conf.child): a las
     # personas las atiende siempre PHP por la atribucion de los leads.
     cache:
@@ -106,12 +105,11 @@ wordpress_sites:
       mailgun_domain: mg.aeinstitute.net
     ssl:
       enabled: true
-      # Let's Encrypt valida por HTTP y los dominios aun apuntan al servidor
-      # actual: la emision fallaria y abortaria el aprovisionamiento. Hasta
-      # mover el DNS, certificado autofirmado. hsts_max_age 0 para que el
-      # navegador no se quede con HSTS de esta maquina.
-      provider: self-signed
-      hsts_max_age: 0
+      # Let's Encrypt valida por HTTP: aprovisionar solo cuando TODOS los
+      # site_hosts y sus redirects ya resuelvan a este servidor, o la prueba de
+      # retos falla y aborta el aprovisionamiento entero. HSTS por defecto
+      # (1 año), como en production.
+      provider: letsencrypt
     # Cache de pagina solo para rastreadores (ver nginx-includes/nginx.conf.child): a las
     # personas las atiende siempre PHP por la atribucion de los leads.
     cache:
