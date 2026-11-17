@@ -5,14 +5,15 @@ php_memory_limit: 256M
 # static: todos los workers arrancan con el servicio. Con dynamic el pool crecia
 # de 2 en 2 por segundo y en una rafaga de ~25 req/s llegaba al tope con 0 idle
 # mientras la CPU estaba casi ociosa.
-# Tope de workers: 2 vCPU / 3,8 GB. El pico medido en el servidor actual
-# fue 2,1 GB con 26 workers; 20 deja ~1,5 GB para MariaDB, Nginx y margen.
+# Tope de workers: 4 vCPU / 7,7 GB, igual que production. El pico medido fue
+# 2,1 GB de RAM con 26 workers; 32 deja mas de 4 GB libres. Con 2 vCPU el
+# pico de campana del 16/nov (78 % de CPU en 4 vCPU) no cabe: requiere 4 vCPU.
 php_fpm_pm: static
-php_fpm_pm_max_children: 20
+php_fpm_pm_max_children: 32
 # Con static solo cuenta max_children; estos quedan coherentes por si se vuelve a dynamic.
-php_fpm_pm_start_servers: 20
-php_fpm_pm_min_spare_servers: 20
-php_fpm_pm_max_spare_servers: 20
+php_fpm_pm_start_servers: 32
+php_fpm_pm_min_spare_servers: 32
+php_fpm_pm_max_spare_servers: 32
 php_fpm_pm_max_requests: 500
 # Cola del socket: las peticiones que llegan con todos los workers ocupados
 # esperan aqui en lugar de devolver 502 al instante.
