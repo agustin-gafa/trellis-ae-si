@@ -53,6 +53,12 @@ wordpress_sites:
       # retos falla y aborta el aprovisionamiento entero. HSTS por defecto
       # (1 año), como en production.
       provider: letsencrypt
+    # Trellis manda "X-Robots-Tag: noindex, nofollow" en todo entorno que no se
+    # llame exactamente production (roles/wordpress-setup/defaults/main.yml,
+    # not_prod). Este entorno se llama prodrockin pero ES produccion: sin esto,
+    # Google desindexa las webs.
+    robots_tag_header:
+      enabled: false
     # Cache de pagina solo para rastreadores (ver nginx-includes/nginx.conf.child): a las
     # personas las atiende siempre PHP por la atribucion de los leads.
     cache:
@@ -110,6 +116,12 @@ wordpress_sites:
       # retos falla y aborta el aprovisionamiento entero. HSTS por defecto
       # (1 año), como en production.
       provider: letsencrypt
+    # Trellis manda "X-Robots-Tag: noindex, nofollow" en todo entorno que no se
+    # llame exactamente production (roles/wordpress-setup/defaults/main.yml,
+    # not_prod). Este entorno se llama prodrockin pero ES produccion: sin esto,
+    # Google desindexa las webs.
+    robots_tag_header:
+      enabled: false
     # Cache de pagina solo para rastreadores (ver nginx-includes/nginx.conf.child): a las
     # personas las atiende siempre PHP por la atribucion de los leads.
     cache:
