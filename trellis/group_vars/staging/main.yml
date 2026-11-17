@@ -2,5 +2,8 @@ mysql_root_password: "{{ vault_mysql_root_password }}" # Define this variable in
 php_memory_limit: 256M
 # Este servidor guarda la copia de fuera del de produccion: esta en otro
 # proveedor y otro centro de datos, asi que perder uno no se lleva el otro.
+# La primera clave es la del servidor viejo (178.156.244.142), con las copias ya
+# paradas: se puede quitar cuando se de de baja. La segunda, la de prodrockin.
 backup_offsite_authorized_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMHMP8U7buMomjRzcG6ocvJAd2qsugDADa/SyTC5i1Vw rockin-backup@178.156.244.142
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICA23lgEgHY45PwPP6rNxem+0pRRs9ZkvlDxw8OFFjl rockin-backup@51.161.83.6

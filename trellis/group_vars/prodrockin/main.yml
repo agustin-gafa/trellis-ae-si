@@ -48,7 +48,9 @@ nginx_cache_use_stale: error timeout updating invalid_header http_500 http_503
 # recuperar rapido una tabla o un fichero sueltos, y una segunda copia en el
 # servidor de staging, que esta en otro proveedor y otro centro de datos: es la
 # que protege de perder esta maquina.
-# Sin copias en prodrockin: escribirian en el mismo repositorio restic externo
-# que el servidor de produccion actual.
-backup_enabled: false
+# Escribe en el mismo repositorio de fuera que tenia production: para poder
+# abrirlo, /root/.rockin-restic-password se copia del servidor viejo antes del
+# primer aprovisionamiento de backup.yml (si no existe, el rol genera otra y el
+# repositorio de fuera queda ilegible para este servidor).
+backup_enabled: true
 backup_offsite_repo: sftp:rockin-backup@51.68.85.26:/var/backups/rockin-offsite/restic
